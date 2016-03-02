@@ -4,6 +4,6 @@ version = "0.1.0"
 authors = ["Nick Cardin <nacardin@gmail.com>"]
 
 [dependencies]
-glium = "0.9"
+glium = "0.9.3"
 glium_text = "0.6"
 cgmath = "0.2"

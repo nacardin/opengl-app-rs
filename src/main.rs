@@ -6,27 +6,52 @@ fn main() {
     use glium::{DisplayBuild, Surface};
     use glium_text::{FontTexture, TextDisplay};
 
-    let display = glium::glutin::WindowBuilder::new().build_glium().unwrap();
+    let window_builder = glium::glutin::WindowBuilder::new();
+    let display = window_builder.build_glium().unwrap();
+    let window = display.get_window().unwrap();
 
     let system = glium_text::TextSystem::new(&display);
 
-    // Creating a `FontTexture`, which a regular `Texture` which contains the font.
-    // Note that loading the systems fonts is not covered by this library.
-    let font = glium_text::FontTexture::new(&display, std::fs::File::open(&std::path::Path::new("/usr/share/fonts/TTF/Oxygen-Sans.ttf")).unwrap(), 256).unwrap();
+    let font_file = std::fs::File::open(&std::path::Path::new("src/fonts/sf_display_regular.ttf")).unwrap();
 
-    // Creating a `TextDisplay` which contains the elements required to draw a specific sentence.
-    let text = glium_text::TextDisplay::new(&system, &font, "Hello world!");
+    let font = glium_text::FontTexture::new(&display, font_file, 64).unwrap();
 
-    // Finally, drawing the text is done like this:
-    let matrix = [[0.1, 0.0, 0.0, 0.0],
-                        [0.0, 0.1, 0.0, 0.0],
-                        [0.0, 0.0, 1.0, 0.0],
-                        [0.0, 0.0, 0.0, 1.0]];
+    let text = glium_text::TextDisplay::new(&system, &font, "Hello World");
+    let text_width = text.get_width();
+
+    let text_color = (0.1, 0.1, 0.1, 1.0);
+
+    println!("tw: {}",  text_width);
+
+    let mut a = 0.0f32;
 
     loop {
+
+        a = a + 0.01f32;
+
+        if(a > 1.0f32) {
+            a = -1.0f32;
+        }
+
+        let (window_width, window_height) = window.get_inner_size_pixels().unwrap();
+        // println!("width: {}",  window_width);
+        // println!("height: {}",  window_height);
+
+        let width_unit = 2.0f32 / window_width as f32;
+        let height_unit = 2.0f32 / window_height as f32;
+
+        let x_mod = text_width * 8f32 * width_unit;
+        let y_mod = 56f32 * height_unit;
+
+        let matrix = [[x_mod, 0.0, 0.0, 0.0],
+                            [0.0, y_mod, 0.0, 0.0],
+                            [0.0, 0.0, 1.0, 0.0],
+                            [-1.0 + a, 0.0, 0.0, 1.0]];
+
+
         let mut target = display.draw();
-        target.clear_color(0.0, 0.0, 1.0, 1.0);
-        glium_text::draw(&text, &system, &mut target, matrix, (1.0, 1.0, 0.0, 1.0));
+        target.clear_color(1.0, 1.0, 1.0, 1.0);
+        glium_text::draw(&text, &system, &mut target, matrix, text_color);
 
         target.finish().unwrap();
 
